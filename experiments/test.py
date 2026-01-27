@@ -10,9 +10,9 @@ from transformers import CLIPProcessor, CLIPModel, CLIPImageProcessorFast, CLIPV
 from torch import inference_mode
 
 
-model = CLIPModel.from_pretrained("openai/clip-vit-large-patch14")
-model_img = CLIPVisionModel.from_pretrained("openai/clip-vit-large-patch14")
-model_text = CLIPTextModel.from_pretrained("openai/clip-vit-large-patch14")
+model = CLIPModel.from_pretrained("openai/clip-vit-large-patch14", return_dict=False)
+model_img = CLIPVisionModel.from_pretrained("openai/clip-vit-large-patch14", return_dict=False)
+model_text = CLIPTextModel.from_pretrained("openai/clip-vit-large-patch14", return_dict=False)
 processor = CLIPProcessor.from_pretrained("openai/clip-vit-large-patch14", use_fast=True)
 # processor_img = CLIPImageProcessorFast.from_pretrained("openai/clip-vit-large-patch14")
 # processor_text = CLIPTokenizerFast.from_pretrained("openai/clip-vit-large-patch14")
@@ -46,6 +46,10 @@ with inference_mode():
     _img_input.to("cuda")
     print("images patchified")
     img_embeddings = model_img(**_img_input)
+    print(type(img_embeddings))
+    print(type(img_embeddings[0]))
+    print(img_embeddings[0].shape)
+    print(img_embeddings[0].dtype)
     print("images embedded")
 
 
