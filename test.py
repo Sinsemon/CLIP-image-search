@@ -1,5 +1,9 @@
+import os
+os.environ['HIP_VISIBLE_DEVICES'] = "1" # wichtig damit integrated gpu nicht erkannt wird!!
+
 from database import Database
 from commandline import parse
+from clip_model import Clip
 
 from unittest import TestCase
 import unittest
@@ -7,6 +11,7 @@ import sys
 from pathlib import Path
 
 import torch
+from PIL import Image
 
 
 # class TestDatabase(TestCase):
@@ -47,6 +52,25 @@ class TestCommandline(TestCase):
         self.assertEqual(args.update, True)
 
 
+class TestClip(TestCase):
+
+    def setUp(self) -> None:
+        super().setUp()
+        self.clip = Clip()
+
+    def test_image_embedding(self):
+        img = Image.open("test_files/images/h9_20181001.jpg")
+        embedding = self.clip.embed_images([img])
+        self.assertEqual(embedding.shape, (1, 512))
+
+    def test_text_embedding(self):
+        embedding = self.clip.embed_text(["hallo", "tschüss"])
+        self.assertEqual(embedding.shape, (2, 512))
+    
+    # def tearDown(self) -> None:
+    #     super().tearDown()
+    #     torch.cuda.synchronize()  # ROCm/HIP-Shutdown-Deadlock
+        
 
 if __name__ == "__main__":
     unittest.main()
