@@ -2,6 +2,7 @@ from pathlib import Path
 from csv import reader
 from typing import Self
 from torch import load, Tensor, save
+import torch
 
 
 class Database:
@@ -24,9 +25,11 @@ class Database:
         self.img_paths = []
         self.img_embeddings = []
 
+
     def __iter__(self):
         for _id, _img_path, _img_embedding in zip(self.ids, self.img_paths, self.img_embeddings):
             yield _id, _img_path, _img_embedding
+
 
     def load(self) -> Self:
         """
@@ -47,6 +50,7 @@ class Database:
                 self.img_embeddings.append(load(self.db_save_path / f"{row[0]}.pt"))
         return self
 
+
     def add(self, img_path:str, embedding:Tensor) -> None:
         _path = Path(img_path)
         if _path.is_file():
@@ -57,10 +61,29 @@ class Database:
         else:
             raise Exception(f"Image path {img_path} is not a file.")
 
-    def get(self, img_id:int) -> tuple[Path, Tensor]:
+
+    def get_by_id(self, img_id:int) -> tuple[Path, Tensor]:
         """Get an image embedding by id"""
         _index = self.ids.index(img_id)
         return self.img_paths[_index], self.img_embeddings[_index]
+    
+
+    def get_similar(self, embedding:Tensor, n:int=20) -> list[tuple[float, Path]]:
+        """
+        Get the `n` most similar images from the database using the cosine similarity
+        
+        :param embedding: Reference embedding to which the most similar database entries are searched
+        :type embedding: Tensor
+        :param n: How many entries should be returned
+        :type n: int
+        :return: A list of the most similar entries (similarity score, Path to image) sorted in descending order.
+        :rtype: list[tuple[float, Path]]
+        """
+        _embeddings_img = torch.stack(self.img_embeddings)
+        similarities = torch.nn.functional.cosine_similarity(embedding, _embeddings_img)
+        indizes = torch.argsort(similarities).__reversed__()
+        return [(similarities[index].item(), self.img_paths[index]) for index in indizes.numpy()]
+
 
     def save(self) -> None:
         """
