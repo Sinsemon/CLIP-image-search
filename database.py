@@ -19,7 +19,7 @@ class Database:
     img_embeddings:list[Tensor]
 
 
-    def __init__(self, save_path:str) -> None:
+    def __init__(self, save_path:str|Path) -> None:
         self.db_save_path = Path(save_path).absolute()
         self.ids = []
         self.img_paths = []
@@ -38,7 +38,7 @@ class Database:
         :return: Returns self. Therefore it is chainable with the constructor.
         :rtype: Self
         """
-        with open(self.db_save_path, mode="r", newline="") as f:
+        with open(self.db_save_path / "db.csv", mode="r", newline="") as f:
             _root, _id = f.readline().strip().split(",")
             self._current_id = int(_id)
             if _root != "None":
@@ -47,11 +47,11 @@ class Database:
             for row in _csv_reader:
                 self.ids.append(int(row[0]))
                 self.img_paths.append(Path(row[1]))
-                self.img_embeddings.append(load(self.db_save_path / f"{row[0]}.pt"))
+                self.img_embeddings.append(load(self.db_save_path / "tensors" / f"{row[0]}.pt"))
         return self
 
 
-    def add(self, img_path:str, embedding:Tensor) -> None:
+    def add(self, img_path:str|Path, embedding:Tensor) -> None:
         _path = Path(img_path)
         if _path.is_file():
             self.ids.append(self._current_id)
@@ -79,10 +79,10 @@ class Database:
         :return: A list of the most similar entries (similarity score, Path to image) sorted in descending order.
         :rtype: list[tuple[float, Path]]
         """
-        _embeddings_img = torch.stack(self.img_embeddings)
+        _embeddings_img = torch.cat(self.img_embeddings)
         similarities = torch.nn.functional.cosine_similarity(embedding, _embeddings_img)
         indizes = torch.argsort(similarities).__reversed__()
-        return [(similarities[index].item(), self.img_paths[index]) for index in indizes.numpy()]
+        return [(similarities[index].item(), self.img_paths[index]) for index in indizes.cpu().numpy()[:n]]
 
 
     def save(self) -> None:
@@ -129,7 +129,7 @@ class Database:
         self.db_root = Path(root_dir).absolute()
         raise NotImplementedError() # TODO
 
-    def clean(self, only_save=False) -> None:
+    def clean(self) -> None:
 
         if self.db_root is None:
             raise Exception("The 'db_root' must exist. Open an existing database first that has a 'db_root'.")

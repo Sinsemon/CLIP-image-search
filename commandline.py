@@ -1,13 +1,18 @@
 from argparse import ArgumentParser
 from pathlib import Path
 
-
+# search with existing:     main.py search -db /path/to/db "Ein Bild von ..."
+# create db:                main.py manage -db /path/to/db --create /path/to/images
+# clean db:                 main.py manage -db /path/to/db --update
 
 class Arguments:
     db_path:Path
     search_string:str
     create:Path
     update:bool
+
+    def __repr__(self) -> str:
+        return "Arguments(" + ", ".join([f"{var}: {getattr(self, var)}" for var in vars(self)]) + ")"
 
 def parse() -> Arguments:
 
@@ -28,8 +33,3 @@ def parse() -> Arguments:
     mng_group.add_argument("--update", action="store_true", help="Insert new images into the database and remove nonexistent images.")
 
     return parser.parse_args(namespace=Arguments())
-
-
-# search with existing:     main.py search -db /path/to/db "Ein Bild von ..."
-# create db:                main.py manage -db /path/to/db --create /path/to/images
-# clean db:                 main.py manage -db /path/to/db --update

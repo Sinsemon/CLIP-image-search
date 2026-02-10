@@ -9,6 +9,7 @@ from unittest import TestCase
 import unittest
 import sys
 from pathlib import Path
+from argparse import ArgumentError
 
 import torch
 from PIL import Image
@@ -44,12 +45,22 @@ class TestCommandline(TestCase):
         self.assertEqual(args.db_path, Path("/path/to/db/db.csv"))
         self.assertEqual(args.create, Path("/path/to/images"))
         self.assertFalse(args.update)
+        self.assertFalse(hasattr(args, "search_string"))
 
     def test_update(self):
         sys.argv = ["/blah/main.py", "manage", "-db", "/path/to/db/db.csv", "--update"]
         args = parse()
         self.assertEqual(args.db_path, Path("/path/to/db/db.csv"))
         self.assertEqual(args.update, True)
+        self.assertFalse(hasattr(args, "search_string"))
+        self.assertIsNone(args.create)
+
+    def test_invalid(self):
+        # update and create are not allowed together
+        sys.argv = ["/blah/main.py", "manage", "-db", "/path/to/db/db.csv", "--update", "--create", "/path/to/images"]
+        with self.assertRaises(SystemExit):
+            args = parse()
+        
 
 
 class TestClip(TestCase):

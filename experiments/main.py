@@ -1,102 +1,38 @@
 # import os
+# # os.environ['AMD_LOG_LEVEL'] = "7"
 # os.environ['HIP_VISIBLE_DEVICES'] = "1" # wichtig damit integrated gpu nicht erkannt wird!!
+# import torch
+# import clip
 # from PIL import Image
 # import requests
 
-# from transformers import CLIPProcessor, CLIPModel, CLIPImageProcessorFast, CLIPVisionModel, CLIPTextModel
+# device = "cuda" if torch.cuda.is_available() else "cpu"
+# print(device)
+# print(clip.available_models())
+# model, preprocess = clip.load("ViT-B/32", device=device)
 
-# model = CLIPModel.from_pretrained("openai/clip-vit-large-patch14")
-# processor = CLIPProcessor.from_pretrained("openai/clip-vit-large-patch14", use_fast=True)
+# image = preprocess(Image.open(requests.get("http://images.cocodataset.org/val2014/COCO_val2014_000000159977.jpg", stream=True).raw)).unsqueeze(0).to(device)
+# print("hallo 0")
+# text = clip.tokenize(["a diagram", "a dog", "a cat"]).to(device)
+# print("hallo 1")
 
-# model.to("cuda")
-# print("Hello 1")
-
-# # %% Load and visualise the images
-# image_urls = [
-#     'http://images.cocodataset.org/val2014/COCO_val2014_000000159977.jpg', 
-#     'http://images.cocodataset.org/val2014/COCO_val2014_000000311295.jpg',
-#     'http://images.cocodataset.org/val2014/COCO_val2014_000000457834.jpg', 
-#     'http://images.cocodataset.org/val2014/COCO_val2014_000000555472.jpg',
-#     'http://images.cocodataset.org/val2014/COCO_val2014_000000174070.jpg',
-#     'http://images.cocodataset.org/val2014/COCO_val2014_000000460929.jpg'
-#     ]
-# images = []
-# for url in image_urls:
-#     images.append(Image.open(requests.get(url, stream=True).raw))
-
-
-# # %% Zero-shot classification
-# classes = ['giraffe', 'zebra', 'elephant', 'teddybear', 'hotdog']
-# inputs = processor(text=classes, images=images, return_tensors="pt", padding=True)
-# print(list(inputs.keys()))
-# print("Hello 2")
-# inputs.to("cuda")
-# print("Hello 3")
-
-# outputs = model(**inputs)
-# print("Hello 4")
-# logits_per_image = outputs.logits_per_image  # this is the image-text similarity score
-# probs = logits_per_image.softmax(dim=1)  # we can take the softmax to get the label probabilities
-
-# # %% Display classification results
-
-# import matplotlib.pyplot as plt
-
-# fig = plt.figure(figsize=(8, 20))
-
-# for idx in range(len(images)):
-
-#     # show original image
-#     fig.add_subplot(len(images), 2, 2*(idx+1)-1 )
-#     plt.imshow(images[idx])
-#     plt.xticks([])
-#     plt.yticks([])
-
-#     # show probabilities
-#     fig.add_subplot(len(images), 2, 2*(idx+1))
-#     plt.barh(range(len(probs[0].cpu().detach().numpy())),probs[idx].cpu().detach().numpy(), tick_label=classes)
-#     plt.xlim(0,1.0)
-
-#     plt.subplots_adjust(left=0.1,
-#                         bottom=0.1,
-#                         right=0.9,
-#                         top=0.9,
-#                         wspace=0.2,
-#                         hspace=0.8)
-
-# plt.show()
-# model.to("cpu")  # necessary for correct exit
-
-
-
-
-import os
-# os.environ['AMD_LOG_LEVEL'] = "7"
-os.environ['HIP_VISIBLE_DEVICES'] = "1" # wichtig damit integrated gpu nicht erkannt wird!!
-import torch
-import clip
-from PIL import Image
-import requests
-
-device = "cuda" if torch.cuda.is_available() else "cpu"
-print(device)
-print(clip.available_models())
-model, preprocess = clip.load("ViT-B/32", device=device)
-
-image = preprocess(Image.open(requests.get("http://images.cocodataset.org/val2014/COCO_val2014_000000159977.jpg", stream=True).raw)).unsqueeze(0).to(device)
-print("hallo 0")
-text = clip.tokenize(["a diagram", "a dog", "a cat"]).to(device)
-print("hallo 1")
-
-with torch.no_grad():
-    print("hallo 1,5")
-    text_features = model.encode_text(text)
-    print("hallo 2")
-    image_features = model.encode_image(image)
-    print("hallo 3")
+# with torch.no_grad():
+#     print("hallo 1,5")
+#     text_features = model.encode_text(text)
+#     print("hallo 2")
+#     image_features = model.encode_image(image)
+#     print("hallo 3")
     
-    logits_per_image, logits_per_text = model(image, text)
-    print("hallo 4")
-    probs = logits_per_image.softmax(dim=-1).cpu().numpy()
+#     logits_per_image, logits_per_text = model(image, text)
+#     print("hallo 4")
+#     probs = logits_per_image.softmax(dim=-1).cpu().numpy()
 
-print("Label probs:", probs)  # prints: [[0.9927937  0.00421068 0.00299572]]
+# print("Label probs:", probs)  # prints: [[0.9927937  0.00421068 0.00299572]]
+
+import torch
+import torch.nn.functional as F
+
+input1 = torch.randn(10, 512)
+input2 = torch.randn(1, 512)
+output = F.cosine_similarity(input1, input2)
+print(output)
