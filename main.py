@@ -6,13 +6,15 @@ import_start = time_ns()
 from commandline import parse
 from database import Database
 from clip_model import Clip
+from const import TIMING
 
 from pathlib import Path
 import sys
 
 from PIL import Image
 
-print("imported: ", (time_ns() - import_start) / 1e9)
+if TIMING:
+    print("imported: ", (time_ns() - import_start) / 1e9)
 
 sys.argv = ["./main.py", "search", "-db", "./test_files/db", "Ein Bild einer Blume."]
 
@@ -32,7 +34,6 @@ if hasattr(args, "search_string"):  # search
     # search
     text_embedding = model.embed_text([args.search_string])
     database.load()
-    print("loaded")
     print(database.get_similar(text_embedding, n=5))
 
 elif not args.update:  # create DB

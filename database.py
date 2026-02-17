@@ -1,3 +1,6 @@
+from const import TIMING
+from utils import catch_time
+
 from pathlib import Path
 from csv import reader
 from typing import Self
@@ -38,16 +41,17 @@ class Database:
         :return: Returns self. Therefore it is chainable with the constructor.
         :rtype: Self
         """
-        with open(self.db_save_path / "db.csv", mode="r", newline="") as f:
-            _root, _id = f.readline().strip().split(",")
-            self._current_id = int(_id)
-            if _root != "None":
-                self.db_root = Path(_root)
-            _csv_reader = reader(f)
-            for row in _csv_reader:
-                self.ids.append(int(row[0]))
-                self.img_paths.append(Path(row[1]))
-                self.img_embeddings.append(load(self.db_save_path / "tensors" / f"{row[0]}.pt"))
+        with catch_time(TIMING, "Database load"):
+            with open(self.db_save_path / "db.csv", mode="r", newline="") as f:
+                _root, _id = f.readline().strip().split(",")
+                self._current_id = int(_id)
+                if _root != "None":
+                    self.db_root = Path(_root)
+                _csv_reader = reader(f)
+                for row in _csv_reader:
+                    self.ids.append(int(row[0]))
+                    self.img_paths.append(Path(row[1]))
+                    self.img_embeddings.append(load(self.db_save_path / "tensors" / f"{row[0]}.pt"))
         return self
 
 
@@ -79,9 +83,10 @@ class Database:
         :return: A list of the most similar entries (similarity score, Path to image) sorted in descending order.
         :rtype: list[tuple[float, Path]]
         """
-        _embeddings_img = torch.cat(self.img_embeddings)
-        similarities = torch.nn.functional.cosine_similarity(embedding, _embeddings_img)
-        indizes = torch.argsort(similarities).__reversed__()
+        with catch_time(TIMING, "Database get_similar"):
+            _embeddings_img = torch.cat(self.img_embeddings)
+            similarities = torch.nn.functional.cosine_similarity(embedding, _embeddings_img)
+            indizes = torch.argsort(similarities).__reversed__()
         return [(similarities[index].item(), self.img_paths[index]) for index in indizes.cpu().numpy()[:n]]
 
 
