@@ -15,19 +15,39 @@ import torch
 from PIL import Image
 
 
-# class TestDatabase(TestCase):
-#     db_save_path = "test_files/db"
-#     images = "test_files/images"
+class TestDatabase(TestCase):
+    db_save_path = "a/b/c"
+    images = "a/b/img"
 
-#     db:Database
+    db:Database
     
-#     def setUp(self) -> None:
-#         super().setUp()
-#         self.db = Database(self.db_save_path)
+    def setUp(self) -> None:
+        super().setUp()
+        self.db = Database(self.db_save_path)
 
-#     def tearDown(self) -> None:
-#         return super().tearDown()
+    def tearDown(self) -> None:
+        return super().tearDown()
     
+    def test_add(self):
+        self.db.add("test_files/images/h9_20181001.jpg", None)
+        self.db.add("test_files/images/h10_20181027.JPG", None)
+        self.assertEqual(self.db.img_paths.index(Path("test_files/images/h10_20181027.JPG")), 1)
+    
+    def test_remove(self):
+        self.db.add("test_files/images/h9_20181001.jpg", 1)
+        self.db.add("test_files/images/h10_20181027.JPG", 2)
+        self.assertEqual(self.db.img_paths.index(Path("test_files/images/h10_20181027.JPG")), 1)
+        _id = self.db.ids[1]
+        self.db.remove(Path("test_files/images/h10_20181027.JPG"))
+        with self.assertRaises(ValueError):
+            self.db.img_paths.index(Path("test_files/images/h10_20181027.JPG"))
+        with self.assertRaises(ValueError):
+            self.db.img_embeddings.index(2)
+        with self.assertRaises(ValueError):
+            self.db.ids.index(_id)
+
+
+
 class TestCommandline(TestCase):
     # search with existing:     main.py search -db /path/to/db "Ein Bild von ..."
     # create db:                main.py manage -db /path/to/db --create /path/to/images

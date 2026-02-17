@@ -5,6 +5,11 @@ from pathlib import Path
 # create db:                main.py manage -db /path/to/db --create /path/to/images
 # clean db:                 main.py manage -db /path/to/db --update
 
+# TODO Commandline verbessern:
+# search with existing:     main.py search -db /path/to/db "Ein Bild von ..."
+# create db:                main.py create -db /path/to/db --image-path /path/to/images
+# clean db:                 main.py update -db /path/to/db
+
 class Arguments:
     db_path:Path
     search_string:str

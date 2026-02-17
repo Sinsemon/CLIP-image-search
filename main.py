@@ -16,14 +16,11 @@ from PIL import Image
 if TIMING:
     print("imported: ", (time_ns() - import_start) / 1e9)
 
-sys.argv = ["./main.py", "search", "-db", "./test_files/db", "Ein Bild einer Blume."]
+# sys.argv = ["./main.py", "manage", "-db", "./test_files/db", "--create", "./test_files/images"]
+sys.argv = ["./main.py", "manage", "-db", "./test_files/db", "--update"]
+# sys.argv = ["./main.py", "search", "-db", "./test_files/db", "Ein Bild einer Blume."]
 
-def recurse_images(path:Path):
-    image_endings = [".jpg", ".png", ".jpeg"]
-    for f in path.rglob("*"):
-        if f.is_file():
-            if f.suffix.lower() in image_endings:
-                yield f
+
 
 
 args = parse()
@@ -37,12 +34,9 @@ if hasattr(args, "search_string"):  # search
     print(database.get_similar(text_embedding, n=5))
 
 elif not args.update:  # create DB
-    for img_path in recurse_images(args.create):
-        emb = model.embed_images([Image.open(img_path)])
-        database.add(img_path, emb)
-    database.save()
+    database.embed_all(args.create, model).save()
 
 else:  # clean DB
-    database.clean()
+    database.load().update(model)
 
 

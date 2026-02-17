@@ -25,7 +25,7 @@ class Clip:  # TODO vlt von Torch erben?
         return self.model.get_text_features(**_text_inp)
 
     def embed_images(self, images:list[Image.Image]):
-        with catch_time(TIMING, "Embed images"):
+        with catch_time(False, "Embed images"):
             _img_input = self.processor(images=images, return_tensors="pt", padding=True)
             _img_input.to(DEVICE)
         return self.model.get_image_features(**_img_input)
