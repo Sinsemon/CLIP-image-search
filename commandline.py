@@ -2,8 +2,8 @@ from argparse import ArgumentParser
 from pathlib import Path
 from typing import Literal
 
-# search with existing:     main.py search -db /path/to/db "Ein Bild von ..."
-# create db:                main.py create -db /path/to/db --image-path /path/to/images
+# search with existing:      main.py search -db /path/to/db "Ein Bild von ..."
+# create db:                 main.py create -db /path/to/db --image-path /path/to/images
 # update db:                 main.py update -db /path/to/db
 
 class Arguments:
@@ -15,10 +15,10 @@ class Arguments:
     def __repr__(self) -> str:
         return "Arguments(" + ", ".join([f"{var}: {getattr(self, var)}" for var in vars(self)]) + ")"
 
-def parse() -> Arguments:
+def parse(args:list[str]|None = None) -> Arguments:
 
     parent_parser = ArgumentParser(add_help=False)
-    parent_parser.add_argument("-db", "--db-path", type=Path, required=True)
+    parent_parser.add_argument("-db", "--db-path", type=Path, required=True, help="Path to existing or new database.")
 
     parser = ArgumentParser(
         prog="CLIP Image Search",
@@ -32,4 +32,8 @@ def parse() -> Arguments:
     search_parser.add_argument("search_string")
     create_parser.add_argument("--image-path", type=Path, help="Create a new database with the given directory as root. All images under this directory will be embedded (includes subdirectories).")
 
-    return parser.parse_args(namespace=Arguments())
+    if args:
+        return parser.parse_args(args, namespace=Arguments())
+    else:
+        return parser.parse_args(namespace=Arguments())
+

@@ -212,6 +212,8 @@ class Database:
         """
         if Path.is_file(self.db_save_path / "db.csv"):
             raise DatabaseExists(self.db_save_path)
+        if not self.db_save_path.exists():
+            raise FileNotFoundError(f"This directory doesn't exist: {self.db_save_path}")
         with catch_time(TIMING, "Database embed_all"):
             self.img_root = Path(root_dir).absolute()
             for img_path in self._recurse_images(Path(root_dir)):

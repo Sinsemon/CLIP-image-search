@@ -18,7 +18,7 @@
     - [x] Open existing DB
     - [x] Embed text
     - [x] Compare to DB and find the $n$ most similar images
-  - [ ] Improve CLI
+  - [x] Improve CLI
 - [ ] Documentation and nice Readme
 
 ## Later

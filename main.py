@@ -16,27 +16,23 @@ from PIL import Image
 if TIMING:
     print("imported: ", (time_ns() - import_start) / 1e9)
 
-# sys.argv = ["./main.py", "manage", "-db", "./test_files/db", "--create", "./test_files/images"]
-sys.argv = ["./main.py", "manage", "-db", "./test_files/db", "--update"]
-# sys.argv = ["./main.py", "search", "-db", "./test_files/db", "Ein Bild einer Blume."]
 
+def main(arguments:list[str]|None = None):
+    args_parsed = parse(arguments)
+    database = Database(args_parsed.db_path)
+    model = Clip()
 
+    if args_parsed.command == "search":  # search
+        # search
+        text_embedding = model.embed_text([args_parsed.search_string])
+        database.load()
+        print(database.get_similar(text_embedding, n=5))
 
+    elif args_parsed.command == "create":  # create DB
+        database.embed_all(args_parsed.image_path, model).save()
 
-args = parse()
-database = Database(args.db_path)
-model = Clip()
+    else:  # update DB
+        database.load().update(model)
 
-if args.command == "search":  # search
-    # search
-    text_embedding = model.embed_text([args.search_string])
-    database.load()
-    print(database.get_similar(text_embedding, n=5))
-
-elif args.command == "create":  # create DB
-    database.embed_all(args.image_path, model).save()
-
-else:  # update DB
-    database.load().update(model)
-
-
+if __name__ == "__main__":
+    main()
