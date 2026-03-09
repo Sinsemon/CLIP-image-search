@@ -27,16 +27,16 @@ args = parse()
 database = Database(args.db_path)
 model = Clip()
 
-if hasattr(args, "search_string"):  # search
+if args.command == "search":  # search
     # search
     text_embedding = model.embed_text([args.search_string])
     database.load()
     print(database.get_similar(text_embedding, n=5))
 
-elif not args.update:  # create DB
-    database.embed_all(args.create, model).save()
+elif args.command == "create":  # create DB
+    database.embed_all(args.image_path, model).save()
 
-else:  # clean DB
+else:  # update DB
     database.load().update(model)
 
 

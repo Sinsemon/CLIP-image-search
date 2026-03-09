@@ -50,34 +50,36 @@ class TestDatabase(TestCase):
 
 class TestCommandline(TestCase):
     # search with existing:     main.py search -db /path/to/db "Ein Bild von ..."
-    # create db:                main.py manage -db /path/to/db --create /path/to/images
-    # clean db:                 main.py manage -db /path/to/db --update
+    # create db:                main.py create -db /path/to/db --image-path /path/to/images
+    # update db:                 main.py update -db /path/to/db
     
     def test_search(self):
         sys.argv = ["/blah/main.py", "search", "-db", "/path/to/db/db.csv", "Ein Bild von ..."]
         args = parse()
+        self.assertEqual(args.command, "search")
         self.assertEqual(args.db_path, Path("/path/to/db/db.csv"))
         self.assertEqual(args.search_string,  "Ein Bild von ...")
+        self.assertIsNone(args.image_path)
     
     def test_create(self):
-        sys.argv = ["/blah/main.py", "manage", "-db", "/path/to/db/db.csv", "--create", "/path/to/images"]
+        sys.argv = ["/blah/main.py", "create", "-db", "/path/to/db/db.csv", "--image-path", "/path/to/images"]
         args = parse()
+        self.assertEqual(args.command, "create")
         self.assertEqual(args.db_path, Path("/path/to/db/db.csv"))
-        self.assertEqual(args.create, Path("/path/to/images"))
-        self.assertFalse(args.update)
-        self.assertFalse(hasattr(args, "search_string"))
+        self.assertEqual(args.image_path, Path("/path/to/images"))
+        self.assertIsNone(args.search_string)
 
     def test_update(self):
-        sys.argv = ["/blah/main.py", "manage", "-db", "/path/to/db/db.csv", "--update"]
+        sys.argv = ["/blah/main.py", "update", "-db", "/path/to/db/db.csv"]
         args = parse()
+        self.assertEqual(args.command, "update")
         self.assertEqual(args.db_path, Path("/path/to/db/db.csv"))
-        self.assertEqual(args.update, True)
-        self.assertFalse(hasattr(args, "search_string"))
-        self.assertIsNone(args.create)
+        self.assertIsNone(args.search_string)
+        self.assertIsNone(args.image_path)
 
     def test_invalid(self):
-        # update and create are not allowed together
-        sys.argv = ["/blah/main.py", "manage", "-db", "/path/to/db/db.csv", "--update", "--create", "/path/to/images"]
+        # update with image path is invalid
+        sys.argv = ["/blah/main.py", "update", "-db", "/path/to/db/db.csv", "--image-path", "/path/to/images"]
         with self.assertRaises(SystemExit):
             args = parse()
         
