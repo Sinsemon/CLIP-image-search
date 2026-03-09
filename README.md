@@ -4,7 +4,7 @@ Have you ever wondered where that one beautiful image you took from the Louvre i
 Do you want to find all the images of your beautiful roses in the garden?
 This is the solution: semantically browse your images using `openai/clip-vit-base-patch16`!
 
-Warning: This program is still very early in development and has very restricted functionality.
+This is a small program I coded to browse my images and because I was curious about CLIP.
 
 ## Installation
 
