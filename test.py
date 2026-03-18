@@ -23,26 +23,25 @@ class TestDatabase(TestCase):
     
     def setUp(self) -> None:
         super().setUp()
-        self.db = Database(self.db_save_path)
+        self.db = Database(self.db_save_path, device="cpu")
 
     def tearDown(self) -> None:
         return super().tearDown()
     
     def test_add(self):
-        self.db.add("test_files/images/h9_20181001.jpg", None)
-        self.db.add("test_files/images/h10_20181027.JPG", None)
+        self.db.add("test_files/images/h9_20181001.jpg", torch.tensor([1]))
+        self.db.add("test_files/images/h10_20181027.JPG", torch.tensor([2]))
         self.assertEqual(self.db.img_paths.index(Path("test_files/images/h10_20181027.JPG")), 1)
     
     def test_remove(self):
-        self.db.add("test_files/images/h9_20181001.jpg", 1)
-        self.db.add("test_files/images/h10_20181027.JPG", 2)
+        self.db.add("test_files/images/h9_20181001.jpg", torch.tensor([1]))
+        self.db.add("test_files/images/h10_20181027.JPG", torch.tensor([2]))
         self.assertEqual(self.db.img_paths.index(Path("test_files/images/h10_20181027.JPG")), 1)
         _id = self.db.ids[1]
         self.db.remove(Path("test_files/images/h10_20181027.JPG"))
         with self.assertRaises(ValueError):
             self.db.img_paths.index(Path("test_files/images/h10_20181027.JPG"))
-        with self.assertRaises(ValueError):
-            self.db.img_embeddings.index(2)
+        self.assertFalse(torch.tensor([2]) in self.db.img_embeddings)
         with self.assertRaises(ValueError):
             self.db.ids.index(_id)
 

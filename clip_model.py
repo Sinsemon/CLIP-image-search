@@ -10,7 +10,7 @@ from PIL import Image
 class Clip:  # TODO vlt von Torch erben?
 
     def __init__(self) -> None:
-        with catch_time(TIMING, "Model load:"):
+        with catch_time(TIMING, "Model load"):
             self.processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch16", use_fast=True)
             self.model = CLIPModel.from_pretrained("openai/clip-vit-base-patch16", return_dict=False)
             self.model.to(DEVICE)

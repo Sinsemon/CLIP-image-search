@@ -88,7 +88,7 @@ python main.py update -db <db/path>
     - [x] Find all images under the given path
     - [x] Embed all images
     - [x] Save embeddings and corresponding image paths in file
-    - [ ] Progress bar
+    - [x] Progress bar
     - [ ] default location
   - [x] Update database to check for deleted / new images
     - [x] Open existing database
@@ -100,6 +100,7 @@ python main.py update -db <db/path>
     - [x] Embed text
     - [x] Compare to DB and find the $n$ most similar images
 - [ ] Documentation and Readme
+- [ ] Make Database creation more efficient (now only 10 - 20 % GPU usage)
 
 ### Later
 
